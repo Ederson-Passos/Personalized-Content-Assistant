@@ -6,12 +6,12 @@ import datetime
 
 from crewai import LLM
 
-from Agents import DocumentAnalysisAgent, ReportingAgent
-from Authentication import GoogleDriveAPI
-from DataBaseManager import initialize_apis_and_db, list_drive_files
+from agents.document_agents import DocumentAnalysisAgent, ReportingAgent
+from core.Authentication import GoogleDriveAPI
+from core.DataBaseManager import initialize_apis_and_db, list_drive_files
 from dotenv import load_dotenv
 
-from ReportGeneretor import process_batches
+from processing.report_generator import process_batches
 
 DRIVE_FOLDER_ID = "1lXQ7R5z8NGV1YGUncVDHntiOFX35r6WO"
 REPORT_DIR = "google_drive_reports"
