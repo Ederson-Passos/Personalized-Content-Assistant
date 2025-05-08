@@ -8,9 +8,9 @@ import fitz
 import openpyxl
 from typing import Dict, Any, Optional, List
 from crewai import Crew, Process, Task, Agent, LLM
-from DataBaseManager import DataBaseManager
-from FolderManager import cleanup_temp_files
-from Tasks import create_document_analysis_tasks, create_reporting_tasks
+from core.DataBaseManager import DataBaseManager
+from core.FolderManager import cleanup_temp_files
+from tasks.document_tasks import create_document_analysis_tasks, create_reporting_tasks
 
 
 def blocking_download_wrapper(

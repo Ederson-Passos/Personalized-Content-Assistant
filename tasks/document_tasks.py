@@ -1,3 +1,6 @@
+from agents.document_agents import DocumentAnalysisAgent
+
+
 def create_document_analysis_tasks(file_path: str, llm: Any) -> List[Task]:
     """
     Cria tarefas para contar palavras e resumir o CONTEÚDO FORNECIDO de um documento.

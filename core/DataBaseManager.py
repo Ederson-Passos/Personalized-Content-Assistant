@@ -18,7 +18,7 @@ from tenacity import (
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-from TextExtractor import TEMP_DOWNLOAD_FOLDER
+from processing.text_processing import TEMP_DOWNLOAD_FOLDER
 
 # Diretório onde os arquivos serão baixados temporariamente
 DOWNLOAD_FOLDER = TEMP_DOWNLOAD_FOLDER

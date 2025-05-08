@@ -5,7 +5,7 @@ import nltk
 from docx import Document
 from openpyxl import load_workbook
 from pptx import Presentation
-from Tokenization import preprocess_text
+from tools.tokenization import preprocess_text
 from nltk.tokenize import word_tokenize
 
 

@@ -7,9 +7,9 @@ from typing import Any, Dict
 
 from crewai.tools import BaseTool
 
-from document_tools import ExtractTextTool, CountWordsTool
+from tools.document_tools import ExtractTextTool, CountWordsTool
 
-from web_tools import (ScrapeWebsiteTool, SeleniumScrapingTool, ExtractLinksToll, ExtractPageStructureTool,
+from tools.web_tools import (ScrapeWebsiteTool, SeleniumScrapingTool, ExtractLinksToll, ExtractPageStructureTool,
                       ClickAndScrapeTool, SimulateMouseMovementTool, SimulateScrollTool, GetElementAttributesTool,
                       SendToGoogleAnalyticsTool, CrawlAndScrapeSiteTool)
 

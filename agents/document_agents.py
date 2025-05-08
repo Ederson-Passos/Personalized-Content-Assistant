@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from crewai.tools import BaseTool
 
-from DocumentTools import ExtractTextTool, CountWordsTool
+from tools.document_tools import ExtractTextTool, CountWordsTool
 
 
 class DocumentAnalysisAgent(Agent):

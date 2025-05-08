@@ -4,7 +4,7 @@ import numpy as np
 from transformers import BertTokenizer, TFBertModel
 import tensorflow as tf
 from typing import List, Dict, Optional, Any
-from TextExtractor import process_and_tokenize_file, TEMP_DOWNLOAD_FOLDER
+from processing.text_processing import process_and_tokenize_file, TEMP_DOWNLOAD_FOLDER
 
 # Importações relacionadas ao GoogleDriveAPI (necessárias para process_batch)
 from googleapiclient.http import MediaIoBaseDownload

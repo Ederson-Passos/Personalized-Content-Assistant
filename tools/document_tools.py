@@ -1,5 +1,5 @@
 from crewai.tools import BaseTool
-from TextExtractor import extract_text
+from processing.text_processing import extract_text
 
 
 class ExtractTextTool(BaseTool):
