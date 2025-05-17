@@ -154,3 +154,24 @@ class DataMiningAgent(Agent):
             verbose=False,
             llm=llm
         )
+
+
+class QuerySynthesisAgent(Agent):
+    """
+    Agent responsible for synthesizing an answer from provided document snippets
+    and listing the source documents with their Google Drive links.
+    """
+    def __init__(self, llm: Any):
+        super().__init__(
+            role="Contextual Answering and Sourcing Specialist",
+            goal="Synthesize a comprehensive answer to the user's query using the provided text snippets from "
+                 "relevant documents. Clearly list the source documents, including their original names, Google Drive "
+                 "IDs, and direct Google Drive view links, to allow the user to reference or download them.",
+            backstory="I'm ai AI assistant skilled at understanding user questions and piecing together information "
+                      "from multiple text sources to provide a clear, consolidated answer. I always cite my sources "
+                      "meticulously, providing actionable links for further exploration.",
+            llm=llm,
+            verbose=True,
+            memory=False,
+            tools=[]
+        )

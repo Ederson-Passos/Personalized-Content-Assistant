@@ -1,11 +1,18 @@
 import os
 import time
 import traceback
-from typing import Optional
-
+import logging
+from typing import Optional, List
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import google.generativeai as genai
+from utills.logger import setup_logger
+
+logger = setup_logger(
+    logger_name="LLMManager",
+    log_file="logs/LLMManager.log",
+    log_level=logging.INFO
+)
 
 
 class GeminiLLM:
@@ -35,18 +42,48 @@ class GeminiLLM:
             )
             # Cria um modelo separado apenas para contagem de tokens
             self._token_counter_model = genai.GenerativeModel('gemini-1.5-flash-latest')
-            print("Modelo ChatGoogleGenerativeAI (gemini-1.5-flash-latest) inicializado.")
+            self._embedding_model_name = "models/text-embedding-004"
+            logger.info(f"✅ [green]ChatGoogleGenerativeAI model (gemini-1.5-flash-latest) and embedding "
+                        f"model ({self._embedding_model_name}) initialized.[/green]")
         except Exception as e:
             print(f"Erro ao inicializar o ChatGoogleGenerativeAI: {e}")
             traceback.print_exc()
             raise RuntimeError("Não foi possível inicializar o modelo Gemini.")
 
-        # Lógica de limite de taxa baseada em requisições por minuto
         self.requests_feitos_no_minuto = 0
         self.inicio_do_minuto = time.time()
-        # Limite da API Gemini Gratuita: 15 requisições por minuto
         self.limite_requisicoes_por_minuto = 15
         self.max_input_tokens_model = 60000
+
+    def generate_embedding(self, text_chunk: str, task_type: str = "RETRIEVAL_DOCUMENT",
+                           title: Optional[str] = None) -> Optional[List[float]]:
+        """
+        Generates embedding for a text chunk using the Embedding Gemini API.
+        Args:
+            text_chunk: the chunk of text to generate the embedding.
+            task_type: Task type for embedding.
+                    "RETRIEVAL_DOCUMENT" for documents to be indexed.
+                    "RETRIEVAL_QUERY" for search queries.
+                    Other types: "SEMANTIC_SIMILARITY", "CLASSIFICATION", "CLUSTERING".
+            title: Optional document title (can improve embeddings for task_type="RETRIEVAL_DOCUMENT")
+        Returns:
+            The embedding vector or None on error.
+        """
+        if not text_chunk:
+            logger.warning("⚠️ [yellow]Warning: Attempt to generate embedding for empty text.[/yellow]")
+            return None
+        try:
+            result = genai.embed_content(
+                model=self._embedding_model_name,
+                content=text_chunk,
+                task_type=task_type,
+                title=title
+            )
+            return result['embedding']
+        except Exception as e:
+            logger.error(f"❌ [red]Error generating embedding: {e}[/red]", exc_info=True)
+            return None
+
 
     def contador_de_tokens(self, texto: str) -> int:
         """Realiza a contagem de tokens usando a API Gemini."""
