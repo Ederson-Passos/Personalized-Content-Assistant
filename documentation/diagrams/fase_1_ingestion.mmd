@@ -1,0 +1,19 @@
+graph TD
+    A[Start] --> B(1. Get files from Google Drive);
+    C[Google Drive API] -- Files & Download Info --> B;
+    B -- Downloaded Files --> D(2. Read Full Document Content);
+    E[LlamaIndex SimpleDirectoryReader] -- Provides Logic for --> D;
+    D -- Full Document Text --> S(3. Generate Document Summary);
+    OLLAMA[Ollama Server] -- Serves Local LLM --> LLM_LOCAL[Local LLM <br/> llama3:8b-instruct-q4_K_M];
+    AGENT_SUM[Ingestion Summarizer Agent <br/> CrewAI] -- Uses --> LLM_LOCAL;
+    AGENT_SUM -- Processes Full Text for --> S;
+    S -- Document Summary --> H_PRE(4. Prepare Data for Chunking);
+    H_PRE -- Full Text & Summary as metadata --> D_CHUNK(5. Chunk Document Content);
+    E_CHUNK[LlamaIndex NodeParser <br/> e.g., SentenceSplitter] -- Provides Logic for --> D_CHUNK;
+    D_CHUNK -- Text Chunks --> F(6. Generate Embeddings for Chunks);
+    E_EMBED[LlamaIndex] -- Integrates & Uses --> G[HuggingFace Embedding Model <br/> Local, e.g., all-MiniLM-L6-v2];
+    G -- Provides Embedding Logic for --> F;
+    F -- Chunks with Embeddings --> H(7. LlamaIndex Creates Nodes <br/> with Text, Embedding & Metadata);
+    H -- LlamaIndex Nodes --> J(8. LlamaIndex Saves Nodes);
+    J -- To Vector Store --> K[ChromaDB <br/> Local, Persistent];
+    K --> Z[End of Ingestion Phase I];
