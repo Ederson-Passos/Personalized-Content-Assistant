@@ -32,8 +32,7 @@ graph TD
         JEC_RUN -- Uses internally configured: --> EMBED_MODEL_CONFIGURED[Embedding Model];
         JEC_RUN -- Internally query: --> CHROMA_DB_STORE;
         JEC_RUN -- Uses internally configured: --> RERANKER_CONFIGURED[Reranker Model];
-        JEC_RUN -- Return --> RETRIEVED_SNIPPETS[Retrieved and Reordered Documents Snippets <br/> Text +
-        ChromaDB Metadata + <br/> Google Drive IDs];
+        JEC_RUN -- Return --> RETRIEVED_SNIPPETS[Retrieved and Reordered Documents Snippets <br/> Text + ChromaDB Metadata + <br/> Google Drive IDs];
     end
 
     CHECK_SNIPPETS_EXIST{Retrieved Snippets?};
@@ -50,15 +49,14 @@ graph TD
         CREATE_SYNTHESIS_AGENT -- Agent assigned to --> CREATE_SYNTHESIS_TASK;
 
         SETUP_CREW --> RAG_CREW[RAG Crew <br/> Agent: QuerySynthesisAgent \n Task: QuerySynthesisTask];
-        RAG_CREW -- kickoff() --> CREW_EXECUTION[Crew execute the task];
-        CREW_EXECUTION -- Produces --> SYNTHESIZED_ANSWER[Synthesized Answer by LLM <br/> Includes references to
-        source documents];
+        RAG_CREW -- kickoff --> CREW_EXECUTION[Crew execute the task];
+        CREW_EXECUTION -- Produces --> SYNTHESIZED_ANSWER[Synthesized Answer by LLM <br/> Includes references to source documents];
     end
 
     subgraph "4. Presentation of the answer and sources"
         direction LR
         SYNTHESIZED_ANSWER -- Answer text --> FORMAT_OUTPUT[Format output to user];
-        RETRIEVED_SNIPPETS -- Metadata (file_name, google_drive_id) for --> FORMAT_OUTPUT;
+        RETRIEVED_SNIPPETS -- Metadata file_name, google_drive_id for --> FORMAT_OUTPUT;
         FORMAT_OUTPUT -- Formated answer and source links from the metadata --> DISPLAY_USER[Present to the user];
     end
     CHECK_SNIPPETS_EXIST -- Yes --> CREATE_SYNTHESIS_AGENT --> RAG_CREW;
