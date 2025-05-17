@@ -1,0 +1,69 @@
+graph TD
+    RAG_PHASE_START[Start of RAG consultation phase];
+
+    subgraph "1. Setup RAG Components and Tools"
+        direction TB
+        LOAD_ENV[Load environment variables .env];
+        INIT_LLM_CREW[Start LLM Ollama for CrewAI <br/> e.g.: ollama/mistral:7b-instruct-q4_K_M];
+        OLLAMA_SVR[OLLAMA Server] --> INIT_LLM_CREW;
+        INIT_EMBED_MODEL[Start HuggingFace Embedding Model <br/> e.g.: sentence-transformers/all-MiniLM-L6-v2];
+        INIT_RERANKER[Start SentenceTransformer Reranker <br/> e.g.: cross-encoder/ms-marco-MiniLM-L-6-v2];
+        INIT_JEC_TOOL[Start LlamaIndexQueryTool \n'Judicious Evocation of Content'];
+        CHROMA_DB_STORE[Vector Store ChromaDB <br/> Enriched in the Ingestion Phase <br/> e.g.: ./chroma_db_store];
+
+        LOAD_ENV --> INIT_LLM_CREW;
+        LOAD_ENV --> INIT_EMBED_MODEL;
+        LOAD_ENV --> INIT_RERANKER;
+        LOAD_ENV --> INIT_JEC_TOOL;
+        LOAD_ENV -- Define the path and collection name --> CHROMA_DB_STORE;
+
+        INIT_EMBED_MODEL -- Passed as instance to --> INIT_JEC_TOOL;
+        INIT_RERANKER -- Passed as instance to --> INIT_JEC_TOOL;
+        CHROMA_DB_STORE -- Connection information to --> INIT_JEC_TOOL;
+    end
+    RAG_PHASE_START --> LOAD_ENV;
+
+    USER_QUERY[User sends query];
+    INIT_JEC_TOOL -- JEC Tool ready --> USER_QUERY;
+
+    subgraph "2. Document Retrive via JEC Tool"
+        direction LR
+        USER_QUERY -- Query text --> JEC_RUN[JEC Tool: run query];
+        JEC_RUN -- Uses internally configured: --> EMBED_MODEL_CONFIGURED[Embedding Model];
+        JEC_RUN -- Internally query: --> CHROMA_DB_STORE;
+        JEC_RUN -- Uses internally configured: --> RERANKER_CONFIGURED[Reranker Model];
+        JEC_RUN -- Return --> RETRIEVED_SNIPPETS[Retrieved and Reordered Documents Snippets <br/> Text +
+        ChromaDB Metadata + <br/> Google Drive IDs];
+    end
+
+    CHECK_SNIPPETS_EXIST{Retrieved Snippets?};
+    RETRIEVED_SNIPPETS --> CHECK_SNIPPETS_EXIST;
+
+    subgraph "3. Summary of the answer with CrewAI"
+        direction TB
+        CHECK_SNIPPETS_EXIST -- Yes --> CREATE_SYNTHESIS_AGENT[Instantiate QuerySynthesisAgent];
+        INIT_LLM_CREW -- LLM for the agent --> CREATE_SYNTHESIS_AGENT;
+
+        CREATE_SYNTHESIS_TASK[Create QuerySynthesisTask];
+        USER_QUERY -- Original query for --> CREATE_SYNTHESIS_TASK;
+        RETRIEVED_SNIPPETS -- Context snippets for --> CREATE_SYNTHESIS_TASK;
+        CREATE_SYNTHESIS_AGENT -- Agent assigned to --> CREATE_SYNTHESIS_TASK;
+
+        SETUP_CREW --> RAG_CREW[RAG Crew <br/> Agent: QuerySynthesisAgent \n Task: QuerySynthesisTask];
+        RAG_CREW -- kickoff() --> CREW_EXECUTION[Crew execute the task];
+        CREW_EXECUTION -- Produces --> SYNTHESIZED_ANSWER[Synthesized Answer by LLM <br/> Includes references to
+        source documents];
+    end
+
+    subgraph "4. Presentation of the answer and sources"
+        direction LR
+        SYNTHESIZED_ANSWER -- Answer text --> FORMAT_OUTPUT[Format output to user];
+        RETRIEVED_SNIPPETS -- Metadata (file_name, google_drive_id) for --> FORMAT_OUTPUT;
+        FORMAT_OUTPUT -- Formated answer and source links from the metadata --> DISPLAY_USER[Present to the user];
+    end
+    CHECK_SNIPPETS_EXIST -- Yes --> CREATE_SYNTHESIS_AGENT --> RAG_CREW;
+    SYNTHESIZED_ANSWER --> FORMAT_OUTPUT
+
+    CHECK_SNIPPETS_EXIST -- No --> END_NO_SNIPPETS[End: no relevant snippet found];
+    DISPLAY_USER --> RAG_PHASE_END[End of RAG query processing]
+    END_NO_SNIPPETS --> RAG_PHASE_END;
